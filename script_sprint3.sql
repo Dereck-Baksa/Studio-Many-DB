@@ -1,43 +1,43 @@
 CREATE DATABASE IF NOT EXISTS studiomanydb;
 USE studiomanydb;
 
-CREATE TABLE tipo_pagamentos(
+CREATE TABLE IF NOT EXISTS tipo_pagamentos(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     tipo VARCHAR(45) NOT NULL
 );
 
-CREATE TABLE status_pagamentos(
+CREATE TABLE IF NOT EXISTS status_pagamentos(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     estado VARCHAR(45)
 );
 
-CREATE TABLE status_clientes_pacotes(
+CREATE TABLE IF NOT EXISTS status_clientes_pacotes(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     estado VARCHAR(45)
 );
 
-CREATE TABLE anamneses(
+CREATE TABLE IF NOT EXISTS anamneses(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     informacao VARCHAR(45),
     arquivo_url VARCHAR(255)
 );
 
-CREATE TABLE tipos_sinais(
+CREATE TABLE IF NOT EXISTS tipos_sinais(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	tipo VARCHAR(45)
 );
 
-CREATE TABLE status_agendamentos(
+CREATE TABLE IF NOT EXISTS status_agendamentos(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     estado VARCHAR(45)
 );
 
-CREATE TABLE perfis(
+CREATE TABLE IF NOT EXISTS perfis(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     perfil VARCHAR(45) NOT NULL
 );
 
-CREATE TABLE usuarios(
+CREATE TABLE IF NOT EXISTS usuarios(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE usuarios(
     FOREIGN KEY (perfil_id) REFERENCES perfis(id)
 );
 
-CREATE TABLE profissionais(
+CREATE TABLE IF NOT EXISTS profissionais(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(75),
     foto_url VARCHAR(75),
@@ -61,7 +61,7 @@ CREATE TABLE profissionais(
     FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
 );
 
-CREATE TABLE bloqueios(
+CREATE TABLE IF NOT EXISTS bloqueios(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     inicio DATETIME NOT NULL,
     fim DATETIME NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE bloqueios(
     FOREIGN KEY (profissional_id) REFERENCES profissionais(id)
 );
 
-CREATE TABLE servicos(
+CREATE TABLE IF NOT EXISTS servicos(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(45) NOT NULL,
     descricao VARCHAR(255),
@@ -88,7 +88,7 @@ CREATE TABLE servicos(
     FOREIGN KEY (tipos_sinais_id) REFERENCES tipos_sinais(id)
 );
 
-CREATE TABLE clientes(
+CREATE TABLE IF NOT EXISTS clientes(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(75) NOT NULL,
     telefone VARCHAR(30) NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE clientes(
     FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
 );
 
-CREATE TABLE anamnese_clientes(
+CREATE TABLE IF NOT EXISTS anamnese_clientes(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	anamneses_id INT NOT NULL,
     clientes_id INT NOT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE anamnese_clientes(
     FOREIGN KEY (clientes_id) REFERENCES clientes(id)
 );
 
-CREATE TABLE servicos_profissionais(
+CREATE TABLE IF NOT EXISTS servicos_profissionais(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	servicos_id INT NOT NULL,
     profissionais_id INT NOT NULL,
@@ -122,7 +122,7 @@ CREATE TABLE servicos_profissionais(
     FOREIGN KEY (profissionais_id) REFERENCES profissionais(id)
 );
 
-CREATE TABLE pacotes(
+CREATE TABLE IF NOT EXISTS pacotes(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(45) NOT NULL,
     total_sessoes INT,
@@ -136,7 +136,7 @@ CREATE TABLE pacotes(
     FOREIGN KEY (servicos_id) REFERENCES servicos(id)
 );
 
-CREATE TABLE agendamentos(
+CREATE TABLE IF NOT EXISTS agendamentos(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     inicio DATETIME,
     fim DATETIME,
@@ -155,7 +155,7 @@ CREATE TABLE agendamentos(
     FOREIGN KEY (criado_por_usuario_id) REFERENCES usuarios(id)
 );
 
-CREATE TABLE pagamentos(
+CREATE TABLE IF NOT EXISTS pagamentos(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     valor DECIMAL(8,2),
     pago_em DATETIME,
@@ -170,7 +170,7 @@ CREATE TABLE pagamentos(
     FOREIGN KEY (tipo_pagamentos_id) REFERENCES tipo_pagamentos(id)
 );
 
-CREATE TABLE cliente_pacotes(
+CREATE TABLE IF NOT EXISTS cliente_pacotes(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	sessoes_restantes INT,
     valido_ate DATETIME,
@@ -187,7 +187,7 @@ CREATE TABLE cliente_pacotes(
     FOREIGN KEY (status_cliente_pacote_id) REFERENCES status_clientes_pacotes(id)
 );
 
-CREATE TABLE agendamento_itens(
+CREATE TABLE IF NOT EXISTS agendamento_itens(
 	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	inicio_atendimento DATETIME,
     fim_atendimento DATETIME,
@@ -205,11 +205,43 @@ CREATE TABLE agendamento_itens(
     FOREIGN KEY (profissional_id) REFERENCES profissionais(id)
 );
 
--- 1. Cadastros Básicos (Tabelas de Apoio)
-INSERT INTO perfis (perfil) VALUES ('Administrador'), ('Profissional'), ('Cliente');
-INSERT INTO status_agendamentos (estado) VALUES ('Agendado'), ('Concluído'), ('Cancelado');
-INSERT INTO status_pagamentos (estado) VALUES ('Pendente'), ('Pago');
-INSERT INTO tipos_sinais (tipo) VALUES ('Não Requer'), ('Valor Fixo'), ('Percentual');
+-- ------------------------------------------------------------------------------------------------------------------ --
+-- ---------------------------------------- CADASTRO INICIAL -------------------------------------------------------- --
+-- ------------------------------------------------------------------------------------------------------------------ --
+INSERT INTO perfis (perfil) VALUES 
+	('Administrador'), 
+    ('Profissional'), 
+    ('Cliente');
+
+INSERT INTO status_agendamentos (estado) VALUES 
+	('Aguardando aprovação'), -- Pagou o sinal, falta a Bea autorizar
+    ('Reservado'), -- Cliente está na lista de espera
+    ('Pendente'), -- Cliente ainda não confirmou na janela de 24 horas
+    ('Agendado'), -- Cliente confirmou a presença na janela de 24 horas
+    ('Reagendado'), -- Data do agendamento alterada
+    ('Concluído'), -- Serviço finalizado
+    ('Cancelado'), -- Serviço cancelado antes do horário do atendimento
+    ('Recusado'), -- Bea não autorizou
+    ('No-show'); -- Cliente não compareceu
+-- Não coloquei nada referente ao check-in, acredito que vai ficar muitos status ao mesmo tempo.
+-- Tirei a parte do status = Pago. Pois acho que isso entra em outra tabela e o agendamento pode ter sido pago, mas não concluído ou outras situações semelhantes.
+
+
+INSERT INTO status_pagamentos (estado) VALUES 
+	('Cancelado'), 
+    ('Pendente'), 
+    ('Pago');
+    
+INSERT INTO tipo_pagamentos (tipo) VALUES 
+	('PIX'), 
+    ('Dinheiro'), 
+    ('Cartão de débito'), 
+    ('Cartão de crédito');
+
+INSERT INTO tipos_sinais (tipo) VALUES 
+	('Sem sinal'), 
+	('Valor Fixo'), 
+    ('Percentual');
 
 -- 2. Criando um Usuário e um Profissional
 INSERT INTO usuarios (email, senha, perfil_id, criado_em) VALUES ('ana.estetica@email.com', 'hash123', 2, NOW());
