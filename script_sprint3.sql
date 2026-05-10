@@ -209,20 +209,22 @@ CREATE TABLE IF NOT EXISTS agendamento_itens(
 -- ---------------------------------------- CADASTRO INICIAL -------------------------------------------------------- --
 -- ------------------------------------------------------------------------------------------------------------------ --
 INSERT INTO perfis (perfil) VALUES 
-	('Administrador'), 
-    ('Profissional'), 
-    ('Cliente');
+	('ROLE_ADMIN'), 
+    ('ROLE_PROFISSIONAL'), 
+    ('ROLE_CLIENTE');
 
 INSERT INTO status_agendamentos (estado) VALUES 
-	('Aguardando aprovação'), -- Pagou o sinal, falta a Bea autorizar
-    ('Reservado'), -- Cliente está na lista de espera
-    ('Pendente'), -- Cliente ainda não confirmou na janela de 24 horas
-    ('Agendado'), -- Cliente confirmou a presença na janela de 24 horas
-    ('Reagendado'), -- Data do agendamento alterada
-    ('Concluído'), -- Serviço finalizado
-    ('Cancelado'), -- Serviço cancelado antes do horário do atendimento
-    ('Recusado'), -- Bea não autorizou
-    ('No-show'); -- Cliente não compareceu
+	('solicitar confirmacao agendamento'), -- Pagou o sinal, falta a Bea autorizar
+    ('agendado'), -- Cliente está agendado
+    ('confirmado'), -- Cliente confirmou a presença na janela de 24 horas
+    ('solicitar cancelamento'), -- Cliente ainda não confirmou na janela de 24 horas
+    ('cancelado'), -- Serviço cancelado antes do horário do atendimento
+    ('solicitar reagendamento'), -- Cliente pede para ser reagendado
+    ('reagendado'), -- Serviço reagendado
+    ('recusado'), -- Bea não autorizou
+    ('concluido'), -- Serviço concluído
+    ('faltou'), -- Cliente não compareceu
+    ('em atendimento'); -- cliente chegou e está em atendimento
 -- Não coloquei nada referente ao check-in, acredito que vai ficar muitos status ao mesmo tempo.
 -- Tirei a parte do status = Pago. Pois acho que isso entra em outra tabela e o agendamento pode ter sido pago, mas não concluído ou outras situações semelhantes.
 
@@ -249,12 +251,12 @@ INSERT INTO profissionais (nome, ativo, usuario_id, criado_em) VALUES ('Ana Silv
 
 -- 3. Criando um Serviço e um Pacote
 INSERT INTO servicos (nome, preco, duracao_minutos, ativo, tipos_sinais_id) VALUES ('Limpeza de Pele', 150.00, 60, TRUE, 1);
-INSERT INTO pacotes (nome, total_sessoes, preco_total, validade_dias, ativo, servicos_id, criado_em) VALUES ('Combo Verão 5x Limpeza', 5, 600.00, 90, TRUE, 1, NOW());
+INSERT INTO pacotes (nome, total_sessoes, preco_total, validade_dias, ativo, servicos_id) VALUES ('Combo Verão 5x Limpeza', 5, 600.00, 90, TRUE, 1);
 
 -- 4. Cadastrando um Cliente e sua Anamnese (Link para o PDF)
 INSERT INTO usuarios (email, senha, perfil_id, criado_em) VALUES ('cliente.joana@email.com', 'hash456', 3, NOW());
 INSERT INTO clientes (nome, telefone, usuario_id, criado_em) VALUES ('Joana Santos', '11999999999', 2, NOW());
-INSERT INTO anamneses (informacao, arquivo_url) VALUES ('Ficha Inicial Joana', 'https://storage.studiomany.com/fichas/joana_anamnese.pdf');
+INSERT INTO anamneses (informacao) VALUES ('Ficha Inicial Joana');
 INSERT INTO anamnese_clientes (anamneses_id, clientes_id) VALUES (1, 1);
 
 -- 5. Fluxo de Agendamento (O "Carrinho")
