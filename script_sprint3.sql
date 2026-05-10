@@ -54,7 +54,6 @@ CREATE TABLE IF NOT EXISTS profissionais(
     nome VARCHAR(75),
     foto_url VARCHAR(75),
     ativo BOOLEAN,
-    criado_em DATETIME,
 
     usuario_id INT UNIQUE,
 
@@ -96,7 +95,6 @@ CREATE TABLE IF NOT EXISTS clientes(
     total_no_shows INT,
     bloqueado_motivo VARCHAR(255),
     lgpd_consentimento BOOLEAN,
-    criado_em DATETIME,
     ativo BOOLEAN,
 
     usuario_id INT UNIQUE,
@@ -247,7 +245,7 @@ INSERT INTO tipos_sinais (tipo) VALUES
 
 -- 2. Criando um Usuário e um Profissional
 INSERT INTO usuarios (email, senha, perfil_id, criado_em) VALUES ('ana.estetica@email.com', 'hash123', 2, NOW());
-INSERT INTO profissionais (nome, ativo, usuario_id, criado_em) VALUES ('Ana Silva', TRUE, 1, NOW());
+INSERT INTO profissionais (nome, ativo, usuario_id, criado_em) VALUES ('Ana Silva', TRUE, 1);
 
 -- 3. Criando um Serviço e um Pacote
 INSERT INTO servicos (nome, preco, duracao_minutos, ativo, tipos_sinais_id) VALUES ('Limpeza de Pele', 150.00, 60, TRUE, 1);
@@ -255,7 +253,7 @@ INSERT INTO pacotes (nome, total_sessoes, preco_total, validade_dias, ativo, ser
 
 -- 4. Cadastrando um Cliente e sua Anamnese (Link para o PDF)
 INSERT INTO usuarios (email, senha, perfil_id, criado_em) VALUES ('cliente.joana@email.com', 'hash456', 3, NOW());
-INSERT INTO clientes (nome, telefone, usuario_id, criado_em) VALUES ('Joana Santos', '11999999999', 2, NOW());
+INSERT INTO clientes (nome, telefone, usuario_id) VALUES ('Joana Santos', '11999999999', 2);
 INSERT INTO anamneses (informacao) VALUES ('Ficha Inicial Joana');
 INSERT INTO anamnese_clientes (anamneses_id, clientes_id) VALUES (1, 1);
 
