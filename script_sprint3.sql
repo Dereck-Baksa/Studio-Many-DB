@@ -1,6 +1,11 @@
 CREATE DATABASE IF NOT EXISTS studiomanydb;
 USE studiomanydb;
 
+CREATE TABLE IF NOT EXISTS tipo_pagamentos(
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    tipo varchar(45) NOT NULL
+)
+
 CREATE TABLE IF NOT EXISTS status_pagamentos (
                                                  id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                                                  estado VARCHAR(45)
